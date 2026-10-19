@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- End-to-end tests against a real FFmpeg. Needs PARADIS_FFMPEG_DIR (the FFmpeg under test) and a
+       full-featured generator FFmpeg for the fixtures (PARADIS_FIXTURE_FFMPEG, default "ffmpeg").
+       See tests/run-integration-tests.sh. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Include="xunit" Version="2.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.*" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ParadisCompress.Core\ParadisCompress.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,319 @@
+<Window x:Class="ParadisCompress.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ParadisCompress.UI"
+        Title="Paradis Compress" Width="640" Height="600" MinWidth="540" MinHeight="460"
+        ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Background}" UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display" FontFamily="Segoe UI"
+        AllowDrop="True" PreviewDragEnter="OnPreviewDragOver" PreviewDragOver="OnPreviewDragOver"
+        PreviewDragLeave="OnPreviewDragLeave" PreviewDrop="OnPreviewDrop" Closing="OnClosing"
+        PreviewKeyDown="OnWindowPreviewKeyDown" PreviewMouseDown="OnWindowPreviewMouseDown"
+        SizeChanged="OnWindowSizeChanged">
+  <!-- Compact layout (rc.2): the everyday workflow fits a ~640 × 600 window without scrolling. Long
+       explanations live behind the (i) buttons and the result's Details button; warnings that matter
+       before starting stay visible as one short line. -->
+  <Grid x:Name="RootGrid">
+    <Grid Margin="18,12,18,10">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <!-- Header -->
+      <Grid Grid.Row="0" Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <local:Wordmark Height="22" HorizontalAlignment="Left" />
+        <TextBlock Grid.Column="1" Text="Video Compressor for Class Recordings" Style="{StaticResource Caption}"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="12,2,0,0" />
+      </Grid>
+
+      <!-- Settings. Scrolls only when the window is made smaller than the content or Advanced is open. -->
+      <ScrollViewer x:Name="MainScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                    Focusable="False">
+        <StackPanel x:Name="SettingsPanel" Margin="0,0,4,0">
+
+          <!-- Input file: name, one line of details, Change. The whole window accepts a dropped file. -->
+          <Border x:Name="DropArea" CornerRadius="8" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
+                  BorderThickness="1.5" Padding="12,8" MinHeight="54">
+            <Grid>
+              <Grid x:Name="EmptyPanel" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="Drop a video here" FontWeight="SemiBold" />
+                  <TextBlock Text="MP4, MOV, MKV, AVI, WebM and more · the original is never changed" Style="{StaticResource Caption}"
+                             FontSize="12" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource FlatButton}" Content="Choose a video…" Padding="12,6"
+                        Margin="10,0,0,0" VerticalAlignment="Center" Click="OnChooseFile" />
+              </Grid>
+              <Grid x:Name="FilePanel" Visibility="Collapsed" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock x:Name="FileNameText" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock x:Name="FileDetailText" Style="{StaticResource Caption}" FontSize="12" Margin="0,2,0,0"
+                             TextTrimming="CharacterEllipsis" />
+                  <TextBlock x:Name="FileNoteText" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource Warning}" Visibility="Collapsed" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource FlatButton}" Content="Change…" Padding="12,6"
+                        Margin="10,0,0,0" VerticalAlignment="Center" Click="OnChooseFile"
+                        AutomationProperties.Name="Change input video" />
+              </Grid>
+            </Grid>
+          </Border>
+
+          <!-- The form: label column + controls. -->
+          <Grid Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="78" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Make -->
+            <TextBlock Grid.Row="0" Text="Make" Style="{StaticResource FormLabel}" />
+            <UniformGrid Grid.Row="0" Grid.Column="1" Columns="2">
+              <RadioButton x:Name="VideoModeRadio" GroupName="Mode" Style="{StaticResource SegmentButton}" Margin="0,0,3,0"
+                           IsChecked="True" Checked="OnOptionChanged" Content="Compressed video (MP4)"
+                           ToolTip="Picture and sound, smaller" />
+              <RadioButton x:Name="AudioModeRadio" GroupName="Mode" Style="{StaticResource SegmentButton}" Margin="3,0,0,0"
+                           Checked="OnOptionChanged" Content="Extract audio (MP3)"
+                           ToolTip="Sound only: slides and on-screen content are not included" />
+            </UniformGrid>
+
+            <!-- Preset (video) / what audio-only leaves out (audio) -->
+            <TextBlock x:Name="PresetLabel" Grid.Row="1" Text="Preset" Style="{StaticResource FormLabel}" Margin="0,8,0,0" />
+            <Grid Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <ComboBox x:Name="PresetCombo" SelectionChanged="OnOptionChanged" AutomationProperties.Name="Preset" />
+              <TextBlock x:Name="AudioOnlyNote" Visibility="Collapsed" FontSize="12" VerticalAlignment="Center"
+                         TextWrapping="Wrap" Foreground="{StaticResource Warning}"
+                         Text="Sound only. Slides and anything on screen are not included." />
+              <Button x:Name="PresetHelpButton" Grid.Column="1" Style="{StaticResource HelpButton}" Margin="8,0,0,0"
+                      Click="OnPresetHelp" AutomationProperties.Name="Help: presets" ToolTip="About the presets" />
+            </Grid>
+
+            <!-- Target size: checkbox, number, unit, help on one row; one short status line below. -->
+            <TextBlock Grid.Row="2" Text="Size" Style="{StaticResource FormLabel}" Margin="0,8,0,0" />
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
+              <CheckBox x:Name="TargetCheck" Style="{StaticResource DarkCheckBox}" Content="Target size"
+                        VerticalAlignment="Center" Checked="OnTargetCheckChanged" Unchecked="OnTargetCheckChanged" />
+              <TextBox x:Name="TargetBox" Style="{StaticResource TextBoxStyle}" Width="76" Margin="10,0,0,0" Padding="7,4"
+                       TextChanged="OnOptionChanged" IsEnabled="False" AutomationProperties.Name="Target size in megabytes"
+                       ToolTip="Decimal MB: 1 MB = 1,000,000 bytes. For example 25 or 99.5" />
+              <TextBlock Text="MB" VerticalAlignment="Center" Margin="6,0,0,0" x:Name="TargetUnitText"
+                         ToolTip="Decimal megabytes: 1 MB = 1,000,000 bytes" />
+              <Button x:Name="TargetHelpButton" Style="{StaticResource HelpButton}" Margin="8,0,0,0"
+                      Click="OnTargetHelp" AutomationProperties.Name="Help: target size" ToolTip="About target size" />
+            </StackPanel>
+            <TextBlock x:Name="TargetMessageText" Grid.Row="3" Grid.Column="1" FontSize="12" Margin="0,4,0,0"
+                       TextWrapping="Wrap" Visibility="Collapsed" />
+
+            <!-- Save to -->
+            <TextBlock Grid.Row="4" Text="Save to" Style="{StaticResource FormLabel}" Margin="0,8,0,0" />
+            <Grid Grid.Row="4" Grid.Column="1" Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock x:Name="FolderText" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" FontSize="12"
+                         Foreground="{StaticResource TextDim}" Text="Next to the original video" />
+              <Button Grid.Column="1" Style="{StaticResource FlatButton}" Content="Folder…" Margin="8,0,0,0"
+                      Padding="10,4" Click="OnChangeFolder" AutomationProperties.Name="Change output folder" />
+            </Grid>
+
+            <!-- File name -->
+            <TextBlock Grid.Row="5" Text="File name" Style="{StaticResource FormLabel}" Margin="0,8,0,0" />
+            <Grid Grid.Row="5" Grid.Column="1" Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBox x:Name="NameBox" Style="{StaticResource TextBoxStyle}" Padding="7,4" TextChanged="OnNameChanged"
+                       AutomationProperties.Name="Output file name" ToolTip="Name of the new file. The original is never changed." />
+              <TextBlock x:Name="ExtensionText" Grid.Column="1" Text=".mp4" VerticalAlignment="Center" Margin="6,0,0,0"
+                         Foreground="{StaticResource TextDim}" />
+            </Grid>
+          </Grid>
+
+          <!-- Advanced: collapsed by default; one summary line of what will be created. -->
+          <Grid Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="AdvancedToggle" Style="{StaticResource LinkButton}" FontSize="12" Content="Show advanced settings"
+                    Click="OnToggleAdvanced" VerticalAlignment="Center" />
+            <TextBlock x:Name="PlanSummaryLine" Grid.Column="1" Style="{StaticResource Caption}" Margin="12,0,0,0"
+                       HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          </Grid>
+          <Border x:Name="AdvancedPanel" Visibility="Collapsed" Margin="0,6,0,0" CornerRadius="6"
+                  Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1">
+            <ScrollViewer x:Name="AdvancedScroll" MaxHeight="190" VerticalScrollBarVisibility="Auto" Focusable="False">
+              <StackPanel Margin="10,8">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="118" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <TextBlock x:Name="ResolutionLabel" Grid.Row="0" Text="Resolution limit" Style="{StaticResource FormLabel}" />
+                  <ComboBox x:Name="ResolutionCombo" Grid.Row="0" Grid.Column="1" Margin="0,0,0,6" SelectionChanged="OnOptionChanged"
+                            AutomationProperties.Name="Resolution limit"
+                            ToolTip="Never enlarges. The limit applies to the shorter side, so it works for portrait videos too." />
+
+                  <TextBlock x:Name="FpsLabel" Grid.Row="1" Text="Frame rate limit" Style="{StaticResource FormLabel}" />
+                  <ComboBox x:Name="FpsCombo" Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" SelectionChanged="OnOptionChanged"
+                            AutomationProperties.Name="Frame rate limit"
+                            ToolTip="Only ever lowers the frame rate; a slower video is never sped up." />
+
+                  <TextBlock x:Name="QualityLabel" Grid.Row="2" Text="Picture quality" Style="{StaticResource FormLabel}" />
+                  <ComboBox x:Name="QualityCombo" Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" SelectionChanged="OnOptionChanged"
+                            AutomationProperties.Name="Picture quality"
+                            ToolTip="Higher quality keeps more detail and makes bigger files. Not used with a target size." />
+
+                  <TextBlock x:Name="Mp3Label" Grid.Row="3" Text="MP3 quality" Style="{StaticResource FormLabel}" />
+                  <ComboBox x:Name="Mp3Combo" Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" SelectionChanged="OnOptionChanged"
+                            AutomationProperties.Name="MP3 quality" />
+
+                  <TextBlock Grid.Row="4" Text="Sound" Style="{StaticResource FormLabel}" />
+                  <CheckBox x:Name="MonoCheck" Grid.Row="4" Grid.Column="1" Style="{StaticResource DarkCheckBox}"
+                            Content="Mix to mono (one channel)" Checked="OnOptionChanged" Unchecked="OnOptionChanged"
+                            ToolTip="Makes the sound a little smaller. A recording that is already mono stays mono either way." />
+                </Grid>
+                <TextBlock x:Name="PlanSummaryText" Style="{StaticResource Caption}" FontSize="12" Margin="0,8,0,0"
+                           TextWrapping="Wrap" />
+                <TextBlock x:Name="PlanNotesText" Style="{StaticResource Caption}" FontSize="12" Margin="0,4,0,0"
+                           TextWrapping="Wrap" Visibility="Collapsed" />
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Action area: always visible, never scrolled away. -->
+      <StackPanel Grid.Row="2" Margin="0,10,0,0">
+
+        <!-- Result (compact) -->
+        <Border x:Name="ResultPanel" Visibility="Collapsed" Margin="0,0,0,8" Padding="12,8" CornerRadius="6"
+                Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock x:Name="ResultHeadline" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock x:Name="ResultSubline" Style="{StaticResource Caption}" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap" />
+            <WrapPanel Margin="0,8,0,0">
+              <Button x:Name="RetryButton" Style="{StaticResource FlatButton}" Content="Retry smaller" Padding="12,5"
+                      Margin="0,0,8,0" Click="OnRetrySmaller" Visibility="Collapsed" BorderBrush="{StaticResource Warning}"
+                      ToolTip="Compress again at a lower bitrate. Replaces the over-target file only once the new one is finished and checked." />
+              <Button x:Name="OpenFileButton" Style="{StaticResource FlatButton}" Content="Open File" Padding="12,5" Margin="0,0,8,0" Click="OnOpenResult" />
+              <Button Style="{StaticResource FlatButton}" Content="Show in Folder" Padding="12,5" Margin="0,0,8,0" Click="OnRevealResult" />
+              <Button x:Name="DetailsButton" Style="{StaticResource FlatButton}" Content="Details" Padding="12,5"
+                      Click="OnResultDetails" AutomationProperties.Name="Result details" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Start -->
+        <Button x:Name="CompressButton" Style="{StaticResource PrimaryButton}" Padding="18,9"
+                HorizontalContentAlignment="Center" Click="OnCompress" Content="COMPRESS" IsEnabled="False" />
+
+        <!-- Progress -->
+        <Border x:Name="ProgressPanel" Visibility="Collapsed" Padding="12,8" CornerRadius="6"
+                Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+              <TextBlock x:Name="ProgressStageText" FontWeight="SemiBold" Text="Getting ready…" TextTrimming="CharacterEllipsis" />
+              <ProgressBar x:Name="JobProgressBar" Minimum="0" Maximum="1" Margin="0,6,0,0" AutomationProperties.Name="Progress" />
+              <TextBlock x:Name="ProgressDetailText" Style="{StaticResource Caption}" FontSize="12" Margin="0,4,0,0"
+                         TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <Button x:Name="CancelButton" Grid.Column="1" Style="{StaticResource FlatButton}" Content="Cancel"
+                    Padding="14,6" Margin="12,0,0,0" VerticalAlignment="Center" Click="OnCancel" />
+          </Grid>
+        </Border>
+
+        <TextBlock x:Name="StatusText" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
+                   HorizontalAlignment="Center" TextAlignment="Center" Visibility="Collapsed" />
+      </StackPanel>
+
+      <!-- Footer -->
+      <Grid Grid.Row="3" Margin="0,10,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button Style="{StaticResource LinkButton}" Content="About" Click="OnAbout" />
+        <Button Grid.Column="1" Style="{StaticResource LinkButton}" Content="Log folder" Margin="14,0,0,0" Click="OnOpenLogs" />
+        <Button Grid.Column="2" Style="{StaticResource LinkButton}" Content="More from Paradis EZ Utilities" Margin="14,0,0,0"
+                Click="OnMoreLink" ToolTip="https://github.com/Paradis-EZ-Utilities" />
+        <TextBlock x:Name="VersionFooterText" Grid.Column="3" Style="{StaticResource Caption}" HorizontalAlignment="Right"
+                   VerticalAlignment="Center" Opacity="0.8" />
+      </Grid>
+    </Grid>
+
+    <!-- Popover layer: help and result details. Positioned in code so it always stays inside the window. -->
+    <Canvas x:Name="PopoverLayer" IsHitTestVisible="True" Background="{x:Null}">
+      <Border x:Name="Popover" Visibility="Collapsed" Width="380" CornerRadius="8" Padding="14,10,10,12"
+              Background="#2F3237" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+              AutomationProperties.Name="Help" KeyboardNavigation.TabNavigation="Cycle">
+        <Border.Effect>
+          <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.5" />
+        </Border.Effect>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="PopoverTitle" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
+          <Button x:Name="PopoverClose" Grid.Column="1" Style="{StaticResource FlatButton}" Padding="7,6"
+                  Margin="8,0,0,0" Click="OnPopoverClose" AutomationProperties.Name="Close" ToolTip="Close (Esc)">
+            <Path Data="M0,0 L8,8 M8,0 L0,8" Stroke="{StaticResource Text}" StrokeThickness="1.5" StrokeStartLineCap="Round"
+                  StrokeEndLineCap="Round" />
+          </Button>
+          <ScrollViewer x:Name="PopoverScroll" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                        VerticalScrollBarVisibility="Auto" Focusable="True" FocusVisualStyle="{x:Null}">
+            <TextBlock x:Name="PopoverBody" FontSize="12" TextWrapping="Wrap" LineHeight="17" Margin="0,0,6,0" />
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Canvas>
+  </Grid>
+</Window>

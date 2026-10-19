@@ -1,0 +1,13 @@
+<Window x:Class="ParadisCompress.UI.ChoiceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Paradis Compress" SizeToContent="Height" Width="440"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Background="{StaticResource Background}" FontFamily="Segoe UI" UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+  <StackPanel Margin="20">
+    <TextBlock x:Name="TitleText" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+    <TextBlock x:Name="MessageText" Margin="0,12,0,0" TextWrapping="Wrap" LineHeight="19" />
+    <WrapPanel x:Name="ButtonPanel" HorizontalAlignment="Right" Margin="0,20,0,0" />
+  </StackPanel>
+</Window>

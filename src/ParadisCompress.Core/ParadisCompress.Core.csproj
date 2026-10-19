@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Everything that decides *what* to encode and *how* to run FFmpeg: probing, presets,
+       target-size maths, argument lists, the job runner, output validation and path safety.
+       No WPF and no Windows-only APIs (the one Windows P/Invoke is guarded at runtime), so the
+       whole engine is tested on any OS against a real FFmpeg. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="ParadisCompress.Core.Tests" />
+    <InternalsVisibleTo Include="ParadisCompress.IntegrationTests" />
+  </ItemGroup>
+</Project>
