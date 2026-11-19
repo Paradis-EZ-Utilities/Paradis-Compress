@@ -15,6 +15,7 @@ slides, code and speech clear. It uses FFmpeg (bundled) and never changes the or
   safe Cancel.
 - A compact result: size change, elapsed time, **Open File**, **Show in Folder**, and **Details**
   with exact byte counts. If the new file isn't smaller, or is above the target, it says so.
+- Join my Discord if you have any issues; https://discord.gg/AGJ79FQvTm
 
 ## Running it
 
